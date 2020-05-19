@@ -8,7 +8,7 @@ namespace PluginTemplate
         public override string Key => "plugin.template";
         public static string PluginName => "Plugin Template";
         public override string Name => PluginName;
-        public override int Version => 1;
+        public override int Version => 2;
 
         public override string Author => "erri120";
         public override string Website => "https://github.com/erri120/";
@@ -23,6 +23,11 @@ namespace PluginTemplate
 
         protected override bool Initialize(bool loadedAny)
         {
+            var utilityLibrary = NetScriptFramework.PluginManager.GetPlugin("utility.library");
+            if (utilityLibrary == null) return false;
+            if (!utilityLibrary.IsInitialized) return false;
+            if (!loadedAny) return false;
+
             _timer = new Timer();
 
             Events.OnMainMenu.Register(e =>
@@ -36,17 +41,14 @@ namespace PluginTemplate
 
             Events.OnFrame.Register(e =>
             {
+                if (!UtilityLibrary.UtilityLibrary.IsInGame || _inMainMenu)
+                    return;
+
                 var now = _timer.Time;
                 if (now - _lastTime < 1000)
                     return;
 
                 _lastTime = now;
-
-                if (Main.Instance == null)
-                    return;
-
-                if (_inMainMenu || Main.Instance.IsGamePaused)
-                    return;
 
                 var player = PlayerCharacter.Instance;
                 if (player == null)
